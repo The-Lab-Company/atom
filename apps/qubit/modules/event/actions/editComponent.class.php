@@ -28,7 +28,7 @@ class EventEditComponent extends sfComponent
             $indexOnSave = true;
         }
 
-        foreach ($this->request->editEvents as $item) {
+        foreach ($this->request->events as $item) {
             // Continue only if user typed something
             foreach ($item as $value) {
                 if (0 < strlen($value)) {
@@ -77,12 +77,13 @@ class EventEditComponent extends sfComponent
 
         if (isset($this->request->deleteEvents)) {
             foreach ($this->request->deleteEvents as $item) {
+                var_dump('DELETE', $item);
                 $params = $this->context->routing->parse(
                     Qubit::pathInfo($item)
                 );
                 $event = $params['_sf_route']->resource;
                 $event->indexOnSave = $indexOnSave;
-                $event->delete();
+                //$event->delete();
             }
         }
     }
@@ -91,24 +92,47 @@ class EventEditComponent extends sfComponent
     {
         $i = 0;
 
-        $this->form = new sfForm();
-        $this->form->widgetSchema->setNameFormat('events[%s]');
-        $this->form->widgetSchema->setIdFormat('events_form_%s');
-
         // Add one event form for each event related to this resource
         foreach ($this->resource->eventsRelatedByobjectId as $event) {
-            $form = new eventForm();
+            $form = new eventForm($this->getFormDefaults($event));
+            $form->getWidgetSchema()->setNameFormat("events[{$i}][%s]");
+
+            // Embed this form into the main form for the page
             $this->form->embedForm($i++, $form);
         }
 
         // Add a blank event form to allow adding a new event
-        $form = new eventForm();
+        $form = new eventForm(['type' => $this->getEventTypeDefault()]);
         $this->form->embedForm($i++, $form);
+    }
 
-        // Embed this form and subforms in the main form for the module
-        if (isset($this->mainForm)) {
-            $this->mainForm->embedForm('events', $this->form);
+    protected function getFormDefaults($event)
+    {
+        return [
+            'id' => $event->id,
+            'date' => $event->date,
+            'startDate' => Qubit::renderDate($event->startDate),
+            'endDate' => Qubit::renderDate($event->endDate),
+            'type' => $this->getEventTypeDefault($event),
+        ];
+    }
+
+    protected function getEventTypeDefault($event = null)
+    {
+        if (isset($event, $event->type)) {
+            $term = $event->type;
+        } else {
+            // Default event type is creation
+            $term = QubitTerm::getById(QubitTerm::CREATION_ID);
         }
+
+        if (!isset($term)) {
+            return null;
+        }
+
+        return $this->context->routing->generate(
+            null, [$term, 'module' => 'term']
+        );
     }
 
     protected function processField($field)

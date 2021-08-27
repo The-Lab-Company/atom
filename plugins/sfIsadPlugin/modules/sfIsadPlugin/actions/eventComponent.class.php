@@ -33,7 +33,7 @@ class sfIsadPluginEventComponent extends InformationObjectEventComponent
     {
         $finalEventIds = [];
 
-        foreach ($this->request->editEvents as $item) {
+        foreach ($this->request->events as $item) {
             if (
                 empty($item['date'])
                 && empty($item['endDate'])

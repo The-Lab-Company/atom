@@ -22,26 +22,27 @@
     </thead>
     <tbody>
       <?php foreach ($form->getEmbeddedForms() as $i => $item) { ?>
-        <?php $item->renderHiddenFields(); ?>
+        <?php echo $item->renderGlobalErrors(); ?>
         <tr class="date <?php echo 0 == ++$i % 2 ? 'even' : 'odd'; ?> related_obj_<?php echo $i; ?>">
           <td>
             <div class="animateNicely">
-              <?php echo $form->date
-                  ->help(__(
-                      'Enter free-text information, including qualifiers or
-                      typographical symbols to express uncertainty, to change
-                      the way the date displays. If this field is not used,
-                      the default will be the start and end years only.'
-                    ))
-                  ->renderRow(); ?>
+              <?php echo $item['type']->renderError(); ?>
+              <?php echo $item['type']->render(); ?>
             </div>
           </td><td>
             <div class="animateNicely">
-              <?php echo $item->startDate->renderRow(); ?>
+              <?php echo $item['date']->renderError(); ?>
+              <?php echo $item['date']->render(); ?>
             </div>
           </td><td>
             <div class="animateNicely">
-              <?php echo $item->endDate->renderRow(); ?>
+              <?php echo $item['startDate']->renderError(); ?>
+              <?php echo $item['startDate']->render(); ?>
+            </div>
+          </td><td>
+            <div class="animateNicely">
+              <?php echo $item['endDate']->renderError(); ?>
+              <?php echo $item['endDate']->render(); ?>
             </div>
           </td>
         </tr>
