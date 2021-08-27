@@ -19,57 +19,39 @@
           <?php echo __('End'); ?>
         </th>
       </tr>
-    </thead><tbody>
-
-      <?php $i = 0; foreach ($resource->getDates() as $item) { ?>
-
-        <?php $form->getWidgetSchema()->setNameFormat("editEvents[{$i}][%s]"); ++$i; ?>
-
-        <tr class="date <?php echo 0 == ++$i % 2 ? 'even' : 'odd'; ?> related_obj_<?php echo $item->id; ?>">
+    </thead>
+    <tbody>
+      <?php foreach ($form->getEmbeddedForms() as $i => $item) { ?>
+        <?php $item->renderHiddenFields(); ?>
+        <tr class="date <?php echo 0 == ++$i % 2 ? 'even' : 'odd'; ?> related_obj_<?php echo $i; ?>">
           <td>
             <div class="animateNicely">
-              <input name="<?php echo $form->getWidgetSchema()->generateName('id'); ?>" type="hidden" value="<?php echo url_for([$item, 'module' => 'event']); ?>"/>
-              <?php $save = $form->type->choices; $form->type->choices += [url_for([$item->type, 'module' => 'term']) => $item->type]; echo $form->getWidgetSchema()->renderField('type', url_for([$item->type, 'module' => 'term'])); $form->type->choices = $save; ?>
+              <?php echo $form->date
+                  ->help(__(
+                      'Enter free-text information, including qualifiers or
+                      typographical symbols to express uncertainty, to change
+                      the way the date displays. If this field is not used,
+                      the default will be the start and end years only.'
+                    ))
+                  ->renderRow(); ?>
             </div>
           </td><td>
             <div class="animateNicely">
-              <?php echo $form->getWidgetSchema()->renderField('date', $item->getDate(['cultureFallback' => true])); ?>
+              <?php echo $item->startDate->renderRow(); ?>
             </div>
           </td><td>
             <div class="animateNicely">
-              <?php echo $form->getWidgetSchema()->renderField('startDate', Qubit::renderDate($item->startDate)); ?>
-            </div>
-          </td><td>
-            <div class="animateNicely">
-              <?php echo $form->getWidgetSchema()->renderField('endDate', Qubit::renderDate($item->endDate)); ?>
+              <?php echo $item->endDate->renderRow(); ?>
             </div>
           </td>
         </tr>
-
       <?php } ?>
-
-      <?php $form->getWidgetSchema()->setNameFormat("editEvents[{$i}][%s]"); ++$i; ?>
-
-      <tr class="date <?php echo 0 == ++$i % 2 ? 'even' : 'odd'; ?>">
-        <td>
-          <div class="animateNicely">
-            <?php echo $form->type; ?>
-          </div>
-        </td><td>
-          <?php echo $form->date; ?>
-        </td><td>
-          <?php echo $form->startDate; ?>
-        </td><td>
-          <?php echo $form->endDate; ?>
-        </td>
-      </tr>
-
-      <tfoot>
-        <tr>
-          <td colspan="5"><a href="#" class="multiRowAddButton"><?php echo __('Add new'); ?></a></td>
-        </tr>
-      </tfoot>
     </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="5"><a href="#" class="multiRowAddButton"><?php echo __('Add new'); ?></a></td>
+      </tr>
+    </tfoot>
   </table>
 
   <?php if (isset($help)) { ?>

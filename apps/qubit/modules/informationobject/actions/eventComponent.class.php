@@ -35,33 +35,33 @@ class InformationObjectEventComponent extends EventEditComponent
         'type',
     ];
 
-    protected function addField($name)
+    protected function addField($form, $name)
     {
         switch ($name) {
             case 'actor':
-                $this->form->setValidator('actor', new sfValidatorString());
-                $this->form->setWidget('actor', new sfWidgetFormSelect(['choices' => []]));
+                $form->setValidator('actor', new sfValidatorString());
+                $form->setWidget('actor', new sfWidgetFormSelect(['choices' => []]));
 
-                $this->form->getWidgetSchema()->actor->setHelp($this->context->i18n->__('Use the actor name field to link an authority record to this description. Search for an existing name in the authority records by typing the first few characters of the name. Alternatively, type a new name to create and link to a new authority record.'));
+                $form->getWidgetSchema()->actor->setHelp($this->context->i18n->__('Use the actor name field to link an authority record to this description. Search for an existing name in the authority records by typing the first few characters of the name. Alternatively, type a new name to create and link to a new authority record.'));
 
                 break;
 
             case 'description':
-                $this->form->setValidator('description', new sfValidatorString());
-                $this->form->setWidget('description', new sfWidgetFormInput());
+                $form->setValidator('description', new sfValidatorString());
+                $form->setWidget('description', new sfWidgetFormInput());
 
                 break;
 
             case 'place':
-                $this->form->setValidator('place', new sfValidatorString());
-                $this->form->setWidget('place', new sfWidgetFormSelect(['choices' => []]));
+                $form->setValidator('place', new sfValidatorString());
+                $form->setWidget('place', new sfWidgetFormSelect(['choices' => []]));
 
-                $this->form->getWidgetSchema()->place->setHelp($this->context->i18n->__('Search for an existing term in the places taxonomy by typing the first few characters of the term name. Alternatively, type a new term to create and link to a new place term.'));
+                $form->getWidgetSchema()->place->setHelp($this->context->i18n->__('Search for an existing term in the places taxonomy by typing the first few characters of the term name. Alternatively, type a new term to create and link to a new place term.'));
 
                 break;
 
             default:
-                return parent::addField($name);
+                return parent::addField($form, $name);
         }
     }
 

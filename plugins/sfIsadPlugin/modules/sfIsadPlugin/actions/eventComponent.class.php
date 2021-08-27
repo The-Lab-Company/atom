@@ -21,6 +21,7 @@ class sfIsadPluginEventComponent extends InformationObjectEventComponent
 {
     // Arrays not allowed in class constants
     public static $NAMES = [
+        'id',
         'date',
         'endDate',
         'startDate',
@@ -30,28 +31,15 @@ class sfIsadPluginEventComponent extends InformationObjectEventComponent
     // TODO Refactor with parent::processForm()
     public function processForm()
     {
-        $params = [$this->request->editEvent];
-        if (isset($this->request->editEvents)) {
-            // If dialog JavaScript did it's work, then use array of parameters
-            $params = $this->request->editEvents;
-        }
-
         $finalEventIds = [];
 
-        foreach ($params as $item) {
+        foreach ($this->request->editEvents as $item) {
             if (
                 empty($item['date'])
                 && empty($item['endDate'])
                 && empty($item['startDate'])
             ) {
                 // Skip this row if there is no date data
-                continue;
-            }
-
-            // Bind $item data to form
-            $this->form->bind($item);
-
-            if (!$this->form->isValid()) {
                 continue;
             }
 
@@ -107,46 +95,6 @@ class sfIsadPluginEventComponent extends InformationObjectEventComponent
                     $item->save();
                 }
             }
-        }
-    }
-
-    protected function addField($name)
-    {
-        switch ($name) {
-            case 'type':
-                if ('arDacsPlugin' == $this->request->module) {
-                    $eventTypes = arDacsPlugin::eventTypes();
-                } else {
-                    $eventTypes = sfIsadPlugin::eventTypes();
-                }
-
-                foreach ($eventTypes as $item) {
-                    // Default event type is creation
-                    if (QubitTerm::CREATION_ID == $item->id) {
-                        $this->form->setDefault(
-                            'type',
-                            $this->context->routing->generate(
-                                null, [$item, 'module' => 'term']
-                            )
-                        );
-                    }
-
-                    $choices[
-                        $this->context->routing->generate(
-                            null, [$item, 'module' => 'term']
-                        )
-                    ] = $item->__toString();
-                }
-
-                $this->form->setValidator('type', new sfValidatorString());
-                $this->form->setWidget('type', new sfWidgetFormSelect(
-                    ['choices' => $choices])
-                );
-
-                break;
-
-            default:
-                return parent::addField($name);
         }
     }
 }

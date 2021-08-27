@@ -90,6 +90,7 @@ class sfIsadPluginEditAction extends InformationObjectEditAction
 
         $this->eventComponent = new sfIsadPluginEventComponent($this->context, 'sfIsadPlugin', 'event');
         $this->eventComponent->resource = $this->resource;
+        $this->eventComponent->mainForm = $this->form;
         $this->eventComponent->execute($this->request);
 
         $this->publicationNotesComponent = new InformationObjectNotesComponent($this->context, 'informationobject', 'notes');

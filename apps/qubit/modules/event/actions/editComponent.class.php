@@ -21,12 +21,6 @@ class EventEditComponent extends sfComponent
 {
     public function processForm()
     {
-        $params = [$this->request->editEvent];
-        if (isset($this->request->editEvents)) {
-            // If dialog JavaScript did it's work, then use array of parameters
-            $params = $this->request->editEvents;
-        }
-
         // Events should index the related resource only when
         // they are managed from the actors form.
         $indexOnSave = false;
@@ -34,7 +28,7 @@ class EventEditComponent extends sfComponent
             $indexOnSave = true;
         }
 
-        foreach ($params as $item) {
+        foreach ($this->request->editEvents as $item) {
             // Continue only if user typed something
             foreach ($item as $value) {
                 if (0 < strlen($value)) {
@@ -43,13 +37,6 @@ class EventEditComponent extends sfComponent
             }
 
             if (1 > strlen($value)) {
-                continue;
-            }
-
-            // Bind request data to form
-            $this->form->bind($item);
-
-            if (!$this->form->isValid()) {
                 continue;
             }
 
@@ -102,113 +89,39 @@ class EventEditComponent extends sfComponent
 
     public function execute($request)
     {
-        // Disable CSRF protection for this sub-form, because the parent form
-        // will block CSRF attacks
-        $this->form = new sfForm([], [], false);
+        $i = 0;
 
-        $this->form->getValidatorSchema()->setOption(
-            'allow_extra_fields', true
-        );
-        $this->form->getWidgetSchema()->setNameFormat('editEvent[%s]');
+        $this->form = new sfForm();
+        $this->form->widgetSchema->setNameFormat('events[%s]');
+        $this->form->widgetSchema->setIdFormat('events_form_%s');
 
-        foreach ($this::$NAMES as $name) {
-            $this->addField($name);
+        // Add one event form for each event related to this resource
+        foreach ($this->resource->eventsRelatedByobjectId as $event) {
+            $form = new eventForm();
+            $this->form->embedForm($i++, $form);
         }
-    }
 
-    protected function addField($name)
-    {
-        switch ($name) {
-            case 'date':
-                $this->form->setValidator('date', new sfValidatorString());
-                $this->form->setWidget('date', new sfWidgetFormInput());
+        // Add a blank event form to allow adding a new event
+        $form = new eventForm();
+        $this->form->embedForm($i++, $form);
 
-                $this->form->getWidgetSchema()->date->setHelp(
-                    $this->context->i18n->__(
-                        'Enter free-text information, including qualifiers or
-                        typographical symbols to express uncertainty, to change
-                        the way the date displays. If this field is not used,
-                        the default will be the start and end years only.'
-                    )
-                );
-
-                break;
-
-            case 'endDate':
-                $this->form->setValidator('endDate', new sfValidatorString());
-                $this->form->setWidget('endDate', new sfWidgetFormInput());
-
-                $this->form->getWidgetSchema()->endDate->setHelp(
-                    $this->context->i18n->__(
-                        'Enter the end year. Do not use any qualifiers or
-                        typographical symbols to express uncertainty. Acceptable
-                        date formats: YYYYMMDD, YYYY-MM-DD, YYYY-MM, YYYY.'
-                    )
-                );
-                $this->form->getWidgetSchema()->endDate->setLabel(
-                    $this->context->i18n->__('End')
-                );
-
-                break;
-
-            case 'startDate':
-                $this->form->setValidator('startDate', new sfValidatorString());
-                $this->form->setWidget('startDate', new sfWidgetFormInput());
-
-                $this->form->getWidgetSchema()->startDate->setHelp(
-                    $this->context->i18n->__(
-                        'Enter the start year. Do not use any qualifiers or
-                        typographical symbols to express uncertainty. Acceptable
-                        date formats: YYYYMMDD, YYYY-MM-DD, YYYY-MM, YYYY.'
-                    )
-                );
-                $this->form->getWidgetSchema()->startDate->setLabel(
-                    $this->context->i18n->__('Start')
-                );
-
-                break;
-
-            case 'type':
-                // Event types, Dublin Core is restricted
-                $eventTypes = QubitTaxonomy::getTermsById(
-                    QubitTaxonomy::EVENT_TYPE_ID
-                );
-
-                if ('sfDcPlugin' == $this->request->module) {
-                    $eventTypes = sfDcPlugin::eventTypes();
-                }
-
-                $choices = [];
-                foreach ($eventTypes as $item) {
-                    // Default event type is creation
-                    if (QubitTerm::CREATION_ID == $item->id) {
-                        $this->form->setDefault(
-                            'type',
-                            $this->context->routing->generate(
-                                null, [$item, 'module' => 'term']
-                            )
-                        );
-                    }
-
-                    $choices += [
-                        $this->context->routing->generate(
-                            null, [$item, 'module' => 'term']
-                        ) => $item->__toString(),
-                    ];
-                }
-
-                $this->form->setValidator('type', new sfValidatorString());
-                $this->form->setWidget('type', new sfWidgetFormSelect(
-                    ['choices' => $choices]
-                ));
-
-                break;
+        // Embed this form and subforms in the main form for the module
+        if (isset($this->mainForm)) {
+            $this->mainForm->embedForm('events', $this->form);
         }
     }
 
     protected function processField($field)
     {
         switch ($field->getName()) {
+            case 'id':
+                $value = $this->form->getValue('id');
+                if (isset($value)) {
+                    $this->event[$field->getName()] = $value;
+                }
+
+                break;
+
             case 'type':
             case 'resourceType':
                 unset($this->event[$field->getName()]);
