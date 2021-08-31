@@ -15,19 +15,25 @@ class EventForm extends sfForm
 
     public function configureDate()
     {
-        $this->setValidator('date', new sfValidatorString());
+        $this->setValidator('date', new sfValidatorString(
+            ['max_length' => 255]
+        ));
         $this->setWidget('date', new sfWidgetFormInput());
     }
 
     public function configureStartDate()
     {
-        $this->setValidator('startDate', new sfValidatorString());
+        $this->setValidator('startDate', new sfValidatorString(
+            ['max_length' => 10]
+        ));
         $this->setWidget('startDate', new sfWidgetFormInput());
     }
 
     public function configureEndDate()
     {
-        $this->setValidator('endDate', new sfValidatorString());
+        $this->setValidator('endDate', new sfValidatorString(
+            ['max_length' => 10]
+        ));
         $this->setWidget('endDate', new sfWidgetFormInput());
     }
 
@@ -37,15 +43,15 @@ class EventForm extends sfForm
         $eventTypes = sfIsadPlugin::eventTypes();
 
         foreach ($eventTypes as $item) {
-            $choices += [
-                $this->context->routing->generate(
-                    null, [$item, 'module' => 'term']
-                ) => $item->__toString(),
-            ];
+            $route = $this->context->routing->generate(
+                null,
+                [$item, 'module' => 'term']
+            );
+            $choices += [$route => $item->__toString()];
         }
 
         $this->setValidator('type', new sfValidatorChoice(
-            ['choices' => $choices]
+            ['choices' => array_keys($choices)]
         ));
         $this->setWidget('type', new sfWidgetFormSelect(
             ['choices' => $choices]

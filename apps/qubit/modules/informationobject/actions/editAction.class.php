@@ -50,6 +50,10 @@ class InformationObjectEditAction extends DefaultEditAction
                 // );
             } else {
                 echo '**** INVALID FORM ****';
+
+                foreach ($this->form->getErrorSchema()->getErrors() as $err) {
+                    var_dump((string) $err);
+                }
             }
         }
 

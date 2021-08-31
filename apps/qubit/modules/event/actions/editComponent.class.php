@@ -77,13 +77,12 @@ class EventEditComponent extends sfComponent
 
         if (isset($this->request->deleteEvents)) {
             foreach ($this->request->deleteEvents as $item) {
-                var_dump('DELETE', $item);
                 $params = $this->context->routing->parse(
                     Qubit::pathInfo($item)
                 );
                 $event = $params['_sf_route']->resource;
                 $event->indexOnSave = $indexOnSave;
-                //$event->delete();
+                $event->delete();
             }
         }
     }
@@ -91,19 +90,23 @@ class EventEditComponent extends sfComponent
     public function execute($request)
     {
         $i = 0;
+        $this->events = new sfForm();
 
         // Add one event form for each event related to this resource
         foreach ($this->resource->eventsRelatedByobjectId as $event) {
-            $form = new eventForm($this->getFormDefaults($event));
+            $form = new EventForm($this->getFormDefaults($event));
             $form->getWidgetSchema()->setNameFormat("events[{$i}][%s]");
 
-            // Embed this form into the main form for the page
-            $this->form->embedForm($i++, $form);
+            // Embed event subform into the events form
+            $this->events->embedForm($i++, $form);
         }
 
-        // Add a blank event form to allow adding a new event
-        $form = new eventForm(['type' => $this->getEventTypeDefault()]);
-        $this->form->embedForm($i++, $form);
+        // Add a blank event subform to allow adding a new event
+        $form = new EventForm(['type' => $this->getEventTypeDefault()]);
+        $form->getWidgetSchema()->setNameFormat("events[{$i}][%s]");
+        $this->events->embedForm($i, $form);
+
+        $this->form->embedForm('events', $this->events);
     }
 
     protected function getFormDefaults($event)
@@ -158,6 +161,10 @@ class EventEditComponent extends sfComponent
                     $this->event[$field->getName()] =
                         $params['_sf_route']->resource;
                 }
+
+                var_dump($params['_sf_route']->resource);
+
+                exit();
 
                 break;
 

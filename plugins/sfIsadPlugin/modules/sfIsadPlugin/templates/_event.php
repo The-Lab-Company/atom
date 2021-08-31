@@ -1,7 +1,5 @@
 <?php $sf_response->addJavaScript('date', 'last'); ?>
 
-<?php echo $form->renderGlobalErrors(); ?>
-
 <div class="section">
 
   <h3><?php echo __('Date(s)'); ?> <span class="form-required" title="<?php echo __('This is a mandatory element.'); ?>">*</span></h3>
@@ -21,11 +19,11 @@
       </tr>
     </thead>
     <tbody>
-      <?php foreach ($form->getEmbeddedForms() as $i => $item) { ?>
-        <?php echo $item->renderGlobalErrors(); ?>
-        <tr class="date <?php echo 0 == ++$i % 2 ? 'even' : 'odd'; ?> related_obj_<?php echo $i; ?>">
+      <?php foreach ($events->getEmbeddedForms() as $i => $item) { ?>
+        <tr class="date <?php echo 0 == $i % 2 ? 'even' : 'odd'; ?> related_obj_<?php echo $i; ?>">
           <td>
             <div class="animateNicely">
+              <?php var_dump($item->getName()); ?>
               <?php echo $item['type']->renderError(); ?>
               <?php echo $item['type']->render(); ?>
             </div>
@@ -36,7 +34,7 @@
             </div>
           </td><td>
             <div class="animateNicely">
-              <?php echo $item['startDate']->renderError(); ?>
+              <?php var_dump($item['startDate']->renderError()); ?>
               <?php echo $item['startDate']->render(); ?>
             </div>
           </td><td>
@@ -46,6 +44,7 @@
             </div>
           </td>
         </tr>
+        <?php ++$i; ?>
       <?php } ?>
     </tbody>
     <tfoot>
