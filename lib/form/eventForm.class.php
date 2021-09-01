@@ -23,16 +23,24 @@ class EventForm extends sfForm
 
     public function configureStartDate()
     {
-        $this->setValidator('startDate', new sfValidatorString(
-            ['max_length' => 10]
+        $this->setValidator('startDate', new sfValidatorRegex(
+            ['max_length' => 10, 'pattern' => '/\d{4}-?\d{0,2}-?\d{0,2}/'],
+            [
+                'invalid' =>
+                'Start date must be in the format YYYY-MM-DD or YYYYMMDD'
+            ],
         ));
         $this->setWidget('startDate', new sfWidgetFormInput());
     }
 
     public function configureEndDate()
     {
-        $this->setValidator('endDate', new sfValidatorString(
-            ['max_length' => 10]
+        $this->setValidator('endDate', new sfValidatorRegex(
+            ['max_length' => 10, 'pattern' => '/\d{4}-?\d{0,2}-?\d{0,2}/'],
+            [
+                'invalid' =>
+                'End date must be in the format YYYY-MM-DD or YYYYMMDD'
+            ],
         ));
         $this->setWidget('endDate', new sfWidgetFormInput());
     }

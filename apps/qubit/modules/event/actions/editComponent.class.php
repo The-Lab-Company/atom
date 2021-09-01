@@ -154,15 +154,16 @@ class EventEditComponent extends sfComponent
                 unset($this->event[$field->getName()]);
 
                 $value = $this->form->getValue($field->getName());
+                var_dump($value);
                 if (isset($value)) {
-                    $params = $this->context->routing->parse(
+
+                    $route = $this->context->routing->parse(
                         Qubit::pathInfo($value)
                     );
-                    $this->event[$field->getName()] =
-                        $params['_sf_route']->resource;
+                    $resource = $route['_sf_route']->resource;
                 }
 
-                var_dump($params['_sf_route']->resource);
+                var_dump($resource);
 
                 exit();
 

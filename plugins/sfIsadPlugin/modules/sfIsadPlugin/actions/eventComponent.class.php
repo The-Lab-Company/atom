@@ -33,7 +33,7 @@ class sfIsadPluginEventComponent extends InformationObjectEventComponent
     {
         $finalEventIds = [];
 
-        foreach ($this->request->events as $item) {
+        foreach ($this->request->events as $i => $item) {
             if (
                 empty($item['date'])
                 && empty($item['endDate'])
@@ -50,14 +50,14 @@ class sfIsadPluginEventComponent extends InformationObjectEventComponent
 
                 // Do not add exiting events to the eventsRelatedByobjectId
                 // array, as they could be deleted before saving the resource
-                $this->event = $params['_sf_route']->resource;
-                array_push($finalEventIds, $this->event->id);
+                $event = $params['_sf_route']->resource;
+                array_push($finalEventIds, $event->id);
             } else {
-                $this->event = new QubitEvent();
-                $this->resource->eventsRelatedByobjectId[] = $this->event;
+                $event = new QubitEvent();
+                $this->resource->eventsRelatedByobjectId[] = $event;
             }
 
-            foreach ($this->form as $field) {
+            foreach ($this->events[$i] as $field) {
                 if (isset($item[$field->getName()])) {
                     $this->processField($field);
                 }
@@ -65,16 +65,16 @@ class sfIsadPluginEventComponent extends InformationObjectEventComponent
 
             // Save existing events as they are not attached
             // to the eventsRelatedByobjectId array
-            if (isset($this->event->id)) {
-                $this->event->indexOnSave = false;
-                $this->event->save();
+            if (isset($event->id)) {
+                $event->indexOnSave = false;
+                $event->save();
             }
         }
 
         // Delete the old events if they don't appear in the table (removed by
         // multiRow.js) Check date events as they are the only ones added in
         // this table
-        foreach ($this->resource->getDates() as $item) {
+        foreach ($this->resource->eventsRelatedByobjectId as $item) {
             if (
                 isset($item->id)
                 && false === array_search($item->id, $finalEventIds)

@@ -45,15 +45,9 @@ class InformationObjectEditAction extends DefaultEditAction
                 $this->resource->save();
                 $this->resource->updateXmlExports();
 
-            // $this->redirect(
+                // $this->redirect(
                 //     [$this->resource, 'module' => 'informationobject']
                 // );
-            } else {
-                echo '**** INVALID FORM ****';
-
-                foreach ($this->form->getErrorSchema()->getErrors() as $err) {
-                    var_dump((string) $err);
-                }
             }
         }
 
