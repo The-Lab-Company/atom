@@ -7,6 +7,14 @@
  */
 class EventForm extends sfForm
 {
+    public static $fields = [
+        'id',
+        'type',
+        'date',
+        'startDate',
+        'endDate',
+    ];
+
     public function configureId()
     {
         $this->setValidator('id', new sfValidatorString());
@@ -51,7 +59,7 @@ class EventForm extends sfForm
         $eventTypes = sfIsadPlugin::eventTypes();
 
         foreach ($eventTypes as $item) {
-            $route = $this->context->routing->generate(
+            $route = sfContext::getInstance()->routing->generate(
                 null,
                 [$item, 'module' => 'term']
             );
@@ -68,8 +76,6 @@ class EventForm extends sfForm
 
     public function configure()
     {
-        $this->context = sfContext::getInstance();
-
         $this->getWidgetSchema()->setNameFormat('event[%s]');
 
         $this->configureId();
