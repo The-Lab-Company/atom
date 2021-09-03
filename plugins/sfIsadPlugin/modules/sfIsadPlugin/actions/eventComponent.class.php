@@ -28,70 +28,49 @@ class sfIsadPluginEventComponent extends InformationObjectEventComponent
         'type',
     ];
 
-    // TODO Refactor with parent::processForm()
-    public function processForm()
+    /**
+     * Get only date events for the ISAD template.
+     */
+    public function getEvents()
     {
-        $finalEventIds = [];
+        return $this->resource->getDates();
+    }
 
-        foreach ($this->request->events as $i => $item) {
-            if (
-                empty($item['date'])
-                && empty($item['endDate'])
-                && empty($item['startDate'])
-            ) {
-                // Skip this row if there is no date data
-                continue;
-            }
-
-            if (!isset($this->request->sourceId) && isset($item['id'])) {
-                $params = $this->context->routing->parse(
-                    Qubit::pathInfo($item['id'])
-                );
-
-                // Do not add exiting events to the eventsRelatedByobjectId
-                // array, as they could be deleted before saving the resource
-                $event = $params['_sf_route']->resource;
-                array_push($finalEventIds, $event->id);
-            } else {
-                $event = new QubitEvent();
-                $this->resource->eventsRelatedByobjectId[] = $event;
-            }
-
-            foreach ($this->events[$i] as $field) {
-                if (isset($item[$field->getName()])) {
-                    $this->processField($field);
-                }
-            }
-
-            // Save existing events as they are not attached
-            // to the eventsRelatedByobjectId array
-            if (isset($event->id)) {
-                $event->indexOnSave = false;
-                $event->save();
-            }
+    public function hasRequiredData($event)
+    {
+        if (
+            empty($event['date']->getValue())
+            && empty($event['endDate']->getValue())
+            && empty($event['startDate']->getValue())
+        ) {
+            // Skip this row if there is no date data
+            return false;
         }
 
-        // Delete the old events if they don't appear in the table (removed by
-        // multiRow.js) Check date events as they are the only ones added in
-        // this table
-        foreach ($this->resource->eventsRelatedByobjectId as $item) {
+        return true;
+    }
+
+    protected function deleteDeletedEvents()
+    {
+        // Delete the old events that were removed from the form by multiRow.js.
+        foreach ($this->getEvents() as $event) {
             if (
-                isset($item->id)
-                && false === array_search($item->id, $finalEventIds)
+                isset($event->id)
+                && false === array_search($event->id, $this->finalEventIds)
             ) {
                 // Will be indexed when description is saved
-                $item->indexOnSave = false;
+                $event->indexOnSave = false;
 
-                // Only delete event if it has no associated actor
                 if (!isset($item->actor)) {
-                    $item->delete();
+                    // Only delete event if it has no associated actor
+                    $event->delete();
                 } else {
-                    // Handle specially as data wasn't created using ISAD
-                    // template
-                    $item->startDate = null;
-                    $item->endDate = null;
-                    $item->date = null;
-                    $item->save();
+                    // ISAD events never have an actor, so keep this event but
+                    // clear the date fields.
+                    $event->startDate = null;
+                    $event->endDate = null;
+                    $event->date = null;
+                    $event->save();
                 }
             }
         }

@@ -19,94 +19,103 @@
 
 class EventEditComponent extends sfComponent
 {
-    public function processForm()
+    protected $finalEventIds = [];
+
+    public function execute($request)
     {
-        // Events should index the related resource only when
-        // they are managed from the actors form.
-        $indexOnSave = false;
-        if ($this->resource instanceof QubitActor) {
-            $indexOnSave = true;
-        }
+        // Create empty "events" form to collect event sub-forms
+        $this->events = new sfForm();
+        $this->addEventForms();
 
-        foreach ($this->request->events as $item) {
-            // Continue only if user typed something
-            foreach ($item as $value) {
-                if (0 < strlen($value)) {
-                    break;
-                }
-            }
+        // Embed "events" form (and sub-forms) in the main form for the page
+        $this->form->embedForm('events', $this->events);
+    }
 
-            if (1 > strlen($value)) {
-                continue;
-            }
-
-            if (!isset($this->request->sourceId) && isset($item['id'])) {
-                $params = $this->context->routing->parse(
-                    Qubit::pathInfo($item['id'])
-                );
-
-                // Do not add exiting events to the eventsRelatedByobjectId
-                // or events array, as they could be deleted before saving
-                // the resource
-                $this->event = $params['_sf_route']->resource;
-            } elseif ($this->resource instanceof QubitActor) {
-                $this->resource->events[] = $this->event = new QubitEvent();
-            } else {
-                $this->resource->eventsRelatedByobjectId[] =
-                    $this->event = new QubitEvent();
-            }
-
-            foreach ($this->form as $field) {
-                if (isset($item[$field->getName()])) {
-                    $this->processField($field);
-                }
-            }
-
-            // Save existing events as they are not attached
-            // to the eventsRelatedByobjectId or events array
-            if (isset($this->event->id)) {
-                $this->event->indexOnSave = $indexOnSave;
-                $this->event->save();
+    public function hasRequiredData($form)
+    {
+        foreach ($form as $field) {
+            if (!empty($field->getValue())) {
+                return true;
             }
         }
 
-        // Stop here if duplicating
+        return false;
+    }
+
+    public function processEventForm($form, $data)
+    {
+        // Continue only if user typed something
+        if (!$this->hasRequiredData($form)) {
+            return;
+        }
+
+        if (!isset($this->request->sourceId) && isset($data['id'])) {
+            // Get the existing QubitEvent object
+            $event = QubitEvent::getById($form['id']->getValue());
+
+            // Do not add exiting events to the
+            // $informationObject->eventsRelatedByobjectId or $actor->events
+            // array, as they could be deleted before saving the resource
+            $this->finalEventIds[] = $event->id;
+        } else {
+            // Create a new QubitEvent object, and link it to $this->resource.
+            // See the actor and informationObject subclasses for addEvent()
+            // method.
+            $event = $this->addEvent(new QubitEvent());
+        }
+
+        if (!isset($event)) {
+            return;
+        }
+
+        foreach ($form as $field) {
+            var_dump('FORM: ', $form->getName());
+            if (isset($data[$field->getName()])) {
+                //$this->processField($this->form['events'][$i][$field->getName()], $event);
+            }
+        }
+
+        // Save existing events as they are not attached to the
+        // eventsRelatedByobjectId or events array
+        if (isset($event->id)) {
+            // Index on save for actors, but not informationObjects
+            $event->indexOnSave = $this->indexOnSave;
+            $event->save();
+        }
+    }
+
+    public function processForms()
+    {
+        foreach ($this->request->events as $i => $postData) {
+            $this->processEventForm($this->events[$i], $postData);
+        }
+
+        // Stop here if duplicating a QubitInformationObject
         if (isset($this->request->sourceId)) {
             return;
         }
 
-        if (isset($this->request->deleteEvents)) {
-            foreach ($this->request->deleteEvents as $item) {
-                $params = $this->context->routing->parse(
-                    Qubit::pathInfo($item)
-                );
-                $event = $params['_sf_route']->resource;
-                $event->indexOnSave = $indexOnSave;
+        // Delete events marked for deletion
+        $this->deleteDeletedEvents();
+    }
+
+    protected function deleteDeletedEvents()
+    {
+        if (!isset($this->request->deleteEvents)) {
+            return;
+        }
+
+        foreach ($this->request->deleteEvents as $eventUri) {
+            $params = $this->context->routing->parse(
+                Qubit::pathInfo($eventUri)
+            );
+            $event = $params['_sf_route']->resource;
+
+            if (isset($event) && QubitEvent::class === class_name($event)) {
+                $event->indexOnSave = $this->indexOnSave;
                 $event->delete();
             }
         }
-    }
-
-    public function execute($request)
-    {
-        $i = 0;
-        $this->events = new sfForm();
-
-        // Add one event form for each event related to this resource
-        foreach ($this->resource->eventsRelatedByobjectId as $event) {
-            $form = new EventForm($this->getFormDefaults($event));
-            $form->getWidgetSchema()->setNameFormat("events[{$i}][%s]");
-
-            // Embed event subform into the events form
-            $this->events->embedForm($i++, $form);
-        }
-
-        // Add a blank event subform to allow adding a new event
-        $form = new EventForm(['type' => $this->getEventTypeDefault()]);
-        $form->getWidgetSchema()->setNameFormat("events[{$i}][%s]");
-        $this->events->embedForm($i, $form);
-
-        $this->form->embedForm('events', $this->events);
     }
 
     protected function getFormDefaults($event)
@@ -138,62 +147,113 @@ class EventEditComponent extends sfComponent
         );
     }
 
-    protected function processField($field)
+    protected function processField($field, &$event)
     {
+        var_dump($field->getName(), $field->getValue());
+
         switch ($field->getName()) {
+            case 'actor':
+                unset($this->event->actor);
+
+                $value = $this->form->getValue('actor');
+                if (isset($value)) {
+                    $params = $this->context->routing->parse(Qubit::pathInfo($value));
+                    $this->event->actor = $params['_sf_route']->resource;
+                }
+
+                break;
+
             case 'id':
-                $value = $this->form->getValue('id');
-                if (isset($value)) {
-                    $this->event[$field->getName()] = $value;
-                }
-
+                // The event id is already set by this point
                 break;
 
-            case 'type':
-            case 'resourceType':
-                unset($this->event[$field->getName()]);
-
-                $value = $this->form->getValue($field->getName());
-                var_dump($value);
-                if (isset($value)) {
-
-                    $route = $this->context->routing->parse(
-                        Qubit::pathInfo($value)
-                    );
-                    $resource = $route['_sf_route']->resource;
-                }
-
-                var_dump($resource);
-
-                exit();
-
-                break;
-
-            case 'startDate':
             case 'endDate':
-                $value = $this->form->getValue($field->getName());
-                if (
-                    isset($value)
-                    && preg_match('/^\d{8}\z/', trim($value), $matches)
-                ) {
+            case 'startDate':
+                $value = $field->getValue();
+
+                if (empty($value)) {
+                    $event[$field->getName()] = null;
+
+                    return;
+                }
+
+                // Parse YYYYMMDD format
+                if (preg_match('/^\d{8}\z/', trim($value), $matches)) {
                     $value = substr($matches[0], 0, 4).'-'.
-                        substr($matches[0], 4, 2).'-'.substr($matches[0], 6, 2);
-                } elseif (
-                    isset($value)
-                    && preg_match('/^\d{6}\z/', trim($value), $matches)
-                ) {
+                        substr($matches[0], 4, 2).'-'.
+                        substr($matches[0], 6, 2);
+                } elseif (preg_match('/^\d{6}\z/', trim($value), $matches)) {
+                    // Parse YYYYMM format
                     $value = substr($matches[0], 0, 4).'-'.
                         substr($matches[0], 4, 2);
                 }
 
-                $this->event[$field->getName()] = $value;
+                $event[$field->getName()] = $value;
+
+                break;
+
+            case 'place':
+                // Get related term id
+                $value = $this->form->getValue('place');
+                if (!empty($value)) {
+                    $params = $this->context->routing->parse(Qubit::pathInfo($value));
+                    $termId = $params['_sf_route']->resource->id;
+                }
+
+                // Get term relation
+                if (isset($this->event->id)) {
+                    $relation = QubitObjectTermRelation::getOneByObjectId($this->event->id);
+                }
+
+                // Nothing to do
+                if (!isset($termId) && !isset($relation)) {
+                    break;
+                }
+
+                // The relation needs to be deleted/updated independently
+                // if the event exits, otherwise when deleting, it will try to
+                // save it again from the objectTermRelationsRelatedByobjectId array.
+                // If the event is new, the relation needs to be created and attached
+                // to the event in the objectTermRelationsRelatedByobjectId array.
+                if (!isset($termId) && isset($relation)) {
+                    $relation->delete();
+
+                    break;
+                }
+
+                if (isset($termId, $relation)) {
+                    $relation->termId = $termId;
+                    $relation->save();
+
+                    break;
+                }
+
+                $relation = new QubitObjectTermRelation();
+                $relation->termId = $termId;
+
+                $this->event->objectTermRelationsRelatedByobjectId[] = $relation;
+
+                break;
+
+            case 'resourceType':
+            case 'type':
+                unset($event->type);
+
+                $value = $field->getValue();
+
+                if (!empty($value)) {
+                    $route = $this->context->routing->parse(
+                        Qubit::pathInfo($value)
+                    );
+                    $term = $route['_sf_route']->resource;
+                }
+
+                $event->type = $term;
 
                 break;
 
             default:
-                $this->event[$field->getName()] = $this->form->getValue(
-                    $field->getName()
-                );
+                $event[$field->getName()] = $field->getValue();
         }
     }
 }

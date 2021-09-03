@@ -208,6 +208,6 @@ class sfIsadPluginEditAction extends InformationObjectEditAction
 
         parent::processForm();
 
-        $this->eventComponent->processForm();
+        $this->eventComponent->processForms();
     }
 }
