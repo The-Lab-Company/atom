@@ -69,7 +69,6 @@ class InformationObjectEventComponent extends EventEditComponent
         // allow editing the existing events
         foreach ($this->getEvents() as $event) {
             $form = new EventForm($this->getFormDefaults($event));
-            $form->getWidgetSchema()->setNameFormat("events[{$i}][%s]");
 
             // Embed the event sub-form into the $this->events form
             $this->events->embedForm($i++, $form);
@@ -77,7 +76,6 @@ class InformationObjectEventComponent extends EventEditComponent
 
         // Add a blank event sub-form to allow adding a new event
         $form = new EventForm(['type' => $this->getEventTypeDefault()]);
-        $form->getWidgetSchema()->setNameFormat("events[{$i}][%s]");
         $this->events->embedForm($i, $form);
     }
 }

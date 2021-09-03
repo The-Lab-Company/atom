@@ -5,7 +5,7 @@
  *
  * @author     David Juhasz <david@artefactual.com>
  */
-class EventForm extends sfForm
+class EventForm extends QubitForm
 {
     public function configureId()
     {

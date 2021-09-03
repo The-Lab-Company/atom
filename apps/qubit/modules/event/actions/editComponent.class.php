@@ -23,12 +23,10 @@ class EventEditComponent extends sfComponent
 
     public function execute($request)
     {
-        // Create empty "events" form to collect event sub-forms
-        $this->events = new sfForm();
-        $this->addEventForms();
-
         // Embed "events" form (and sub-forms) in the main form for the page
+        $this->events = new QubitForm();
         $this->form->embedForm('events', $this->events);
+        $this->addEventForms();
     }
 
     public function hasRequiredData($form)

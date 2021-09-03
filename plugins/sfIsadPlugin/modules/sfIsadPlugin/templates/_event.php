@@ -23,23 +23,23 @@
         <tr class="date <?php echo 0 == $i % 2 ? 'even' : 'odd'; ?> related_obj_<?php echo $i; ?>">
           <td>
             <div class="animateNicely">
-              <?php echo $form['events'][$i]['type']->renderError(); ?>
-              <?php echo $form['events'][$i]['type']->render(); ?>
+              <?php echo $item['type']->renderError(); ?>
+              <?php echo $item['type']->render(); ?>
             </div>
           </td><td>
             <div class="animateNicely">
-              <?php echo $form['events'][$i]['date']->renderError(); ?>
-              <?php echo $form['events'][$i]['date']->render(); ?>
+              <?php echo $item['date']->renderError(); ?>
+              <?php echo $item['date']->render(); ?>
             </div>
           </td><td>
             <div class="animateNicely">
-              <?php echo $form['events'][$i]['startDate']->renderError(); ?>
-              <?php echo $form['events'][$i]['startDate']->render(); ?>
+              <?php echo $item['startDate']->renderError(); ?>
+              <?php echo $item['startDate']->render(); ?>
             </div>
           </td><td>
             <div class="animateNicely">
-              <?php echo $form['events'][$i]['endDate']->renderError(); ?>
-              <?php echo $form['events'][$i]['endDate']->render(); ?>
+              <?php echo $item['endDate']->renderError(); ?>
+              <?php echo $item['endDate']->render(); ?>
             </div>
           </td>
         </tr>
