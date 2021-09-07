@@ -18,7 +18,7 @@
           <?php } ?>
           <?php include_slot('after-content'); ?>
         </div>
-        <div id="context-menu" class="col-md-3">
+        <div id="context-menu" class="col-md-3 d-print-none">
           <?php include_slot('context-menu'); ?>
         </div>
       </div>

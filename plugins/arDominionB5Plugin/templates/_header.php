@@ -3,12 +3,12 @@
 <?php echo get_component('default', 'updateCheck'); ?>
 
 <?php if ($sf_user->isAdministrator() && '' === (string) QubitSetting::getByName('siteBaseUrl')) { ?>
-  <div class="alert alert-primary rounded-0 text-center mb-0" role="alert">
+  <div class="alert alert-primary rounded-0 text-center mb-0 d-print-none" role="alert">
     <?php echo link_to(__('Please configure your site base URL'), 'settings/siteInformation', ['class' => 'alert-link']); ?>
   </div>
 <?php } ?>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark d-print-none">
   <div class="container-fluid">
     <?php if (sfConfig::get('app_toggleLogo') || sfConfig::get('app_toggleTitle')) { ?>
       <a class="navbar-brand d-flex flex-wrap flex-lg-nowrap align-items-center py-0 me-0" href="<?php echo url_for('@homepage'); ?>" title="<?php echo __('Home'); ?>" rel="home">
@@ -45,7 +45,7 @@
 </nav>
 
 <?php if (sfConfig::get('app_toggleDescription') && !empty(sfConfig::get('app_siteDescription'))) { ?>
-  <div class="bg-secondary text-white">
+  <div class="bg-secondary text-white d-print-none">
     <div class="container-xl py-1">
       <?php echo esc_specialchars(sfConfig::get('app_siteDescription')); ?>
     </div>
