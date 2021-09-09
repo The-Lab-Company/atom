@@ -2,9 +2,14 @@
   "use strict";
   Drupal.behaviors.imageflow = {
     attach: () => {
+
       var node = $("#atom-digital-object-carousel");
 
-      if ($(node).length) {
+      if (!$(node).length) {
+        return;
+      }
+
+      $(node).imagesLoaded().always(() => {
         $("#atom-slider-images").slick({
           slidesToShow: 1,
           slidesToScroll: 1,
@@ -38,7 +43,7 @@
         });
 
         $("#atom-slider-images").slick("slickGoTo", 0);
-      }
+      });
     }
   };
 })(jQuery);
