@@ -2,7 +2,7 @@
   "use strict";
 
   $(function () {
-    var $node = $(".index #fullwidth-treeview");
+    var $node = $(".index #fullwidth-treeview-available");
 
     if ($node.length) {
       loadTreeView();
@@ -210,7 +210,7 @@
 
         // Replace description content
         $("#main-column .row").replaceWith(
-          $(response.find("#main-column .row"))
+          $(response.find("#main-column .row").first())
         );
 
         // If translation links exist in the response page, create element, if necessary,
