@@ -2,7 +2,7 @@
   "use strict";
 
   $(function () {
-    var $node = $(".index #fullwidth-treeview-available");
+    var $node = $(".index #fullwidth-treeview-capable");
 
     if ($node.length) {
       loadTreeView();
@@ -163,6 +163,34 @@
       },
     };
 
+    var showAlert = function (message, type) {
+      if (!type) {
+        type = "";
+      }
+
+      var $alert = $(
+        '<div class="alert ' +
+          type +
+          ' alert-dismissible fade show" role="alert">'
+      ).append(message);
+
+      var closeButton =
+        '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="' +
+        $(".index #fullwidth-treeview-present").data("treeview-alert-close") +
+        '"></button>';
+
+      $alert.append(closeButton);
+
+      $alert.prependTo($("body > #wrapper"));
+      window.scrollTo({ top: 0 });
+
+      return $alert;
+    };
+
+    var deleteAlerts = function () {
+      $("body > #wrapper > .alert").remove();
+    }
+
     // Declare listeners
     // On ready: scroll to active node
     var readyListener = function () {
@@ -286,24 +314,16 @@
         }).responseText
       );
 
+      deleteAlerts();
+
       // Show alert with request result
       if (moveResponse.error) {
-        $(
-          '<div class="alert">' +
-            '<button type="button" data-dismiss="alert" class="close">&times;</button>'
-        )
-          .append(moveResponse.error)
-          .prependTo($("#wrapper.container"));
+        showAlert(moveResponse.error, "alert-danger");
 
         // Reload treeview if failed
         data.instance.refresh();
-      } else if (moveResponse.success) {
-        $(
-          '<div class="alert">' +
-            '<button type="button" data-dismiss="alert" class="close">&times;</button>'
-        )
-          .append(moveResponse.success)
-          .prependTo($("#wrapper.container"));
+      } else if (moveResponse.success, "alert") {
+        showAlert(moveResponse.success, "alert-info");
       }
     };
 
