@@ -163,6 +163,18 @@
       },
     };
 
+    function scrollToActive() {
+      var $activeNode;
+
+      $activeNode = $('li > a.jstree-clicked')[0];
+      pager.updateMoreLink($moreButton, $resetButton);
+
+      // Override default scrolling
+      if ($activeNode !== undefined) {
+        $activeNode.scrollIntoView(false);
+      }
+    };
+
     var showAlert = function (message, type) {
       if (!type) {
         type = "";
@@ -194,15 +206,7 @@
     // Declare listeners
     // On ready: scroll to active node
     var readyListener = function () {
-      var $activeNode = $('li[selected_on_load="true"]')[0];
-
-      pager.updateMoreLink($moreButton, $resetButton);
-
-      // Override default scrolling
-      if ($activeNode !== undefined) {
-        $activeNode.scrollIntoView(true);
-        $("body")[0].scrollIntoView(true);
-      }
+     scrollToActive();
     };
 
     // On node selection: load the informationobject's page and insert the current page
