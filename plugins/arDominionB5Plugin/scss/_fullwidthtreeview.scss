@@ -13,27 +13,28 @@
 
 #fullwidth-treeview-row {
   margin-bottom: 30px;
-  border: 1px solid #ddd;
   clear: both;
 }
 
 #fullwidth-treeview {
   overflow-x: hidden;
   height: 100%;
-  background-color: #ffffff;
+  background-color: $white;
+  border: $border-width solid $border-color;
+  border-radius: $border-radius;
+  margin-bottom: $spacer;
 }
 
 .ui-resizable-s {
   background-image: url("/images/resizable_grip.png");
-  height: 9px;
-  border: 1px solid #ddd;
+  height: 12px;
+  border: $border-width solid $border-color;
+  border-radius: $border-radius;
   cursor: ns-resize;
   background-repeat: no-repeat;
   background-position: center center;
   background-color: #eee;
   bottom: -11px;
-  left: -1px;
-  margin: -1px;
 }
 
 .fullwidth-treeview-toggle.active {
@@ -65,13 +66,4 @@
   margin-top: 14px;
   margin-left: 6px;
   float: right;
-}
-
-// From search.less
-.full-treeview-section {
-  background-color: $gray-200;
-  border: 1px solid $black;
-  .actions {
-    margin-bottom: -20px;
-  }
 }
