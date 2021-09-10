@@ -166,14 +166,14 @@
     function scrollToActive() {
       var $activeNode;
 
-      $activeNode = $('li > a.jstree-clicked')[0];
+      $activeNode = $("li > a.jstree-clicked")[0];
       pager.updateMoreLink($moreButton, $resetButton);
 
       // Override default scrolling
       if ($activeNode !== undefined) {
         $activeNode.scrollIntoView(false);
       }
-    };
+    }
 
     var showAlert = function (message, type) {
       if (!type) {
@@ -201,12 +201,12 @@
 
     var deleteAlerts = function () {
       $("body > #wrapper > .alert").remove();
-    }
+    };
 
     // Declare listeners
     // On ready: scroll to active node
     var readyListener = function () {
-     scrollToActive();
+      scrollToActive();
     };
 
     // On node selection: load the informationobject's page and insert the current page
@@ -307,7 +307,7 @@
 
         // Reload treeview if failed
         data.instance.refresh();
-      } else if (moveResponse.success, "alert") {
+      } else if ((moveResponse.success, "alert")) {
         showAlert(moveResponse.success, "alert-info");
       }
     };
