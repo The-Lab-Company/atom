@@ -1,4 +1,6 @@
 (function ($) {
+  "use strict";
+
   Drupal.behaviors.mediaelement = {
     attach: function (context) {
       $("video, audio", context).each(function () {

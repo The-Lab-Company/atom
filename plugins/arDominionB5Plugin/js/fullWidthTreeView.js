@@ -53,8 +53,8 @@
     var collectionUrl = $treeViewConfig.data("collection-url");
     var itemsPerPage = $treeViewConfig.data("items-per-page");
     var pathToApi = "/informationobject/fullWidthTreeView";
-    var $fwTreeView = $('<div id="fullwidth-treeview"></div>');
-    var $fwTreeViewRow = $('<div id="fullwidth-treeview-row"></div>');
+    var $fwTreeView = $('<div id="fullwidth-treeview" class="h-100 bg-white mb-3 rounded-top border"></div>');
+    var $fwTreeViewRow = $('<div id="fullwidth-treeview-row" class="mb-4"></div>');
     var $mainHeader = $("#main-column h1").first();
     var $moreButton = $("#fullwidth-treeview-more-button");
     var $resetButton = $("#fullwidth-treeview-reset-button");
@@ -188,7 +188,7 @@
 
       var closeButton =
         '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="' +
-        $(".index #fullwidth-treeview-present").data("treeview-alert-close") +
+        $(".index #fullwidth-treeview-capable").data("treeview-alert-close") +
         '"></button>';
 
       $alert.append(closeButton);
