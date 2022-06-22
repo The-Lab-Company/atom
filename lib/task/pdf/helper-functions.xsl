@@ -3,17 +3,19 @@
     <!--
         *******************************************************************
         *                                                                 *
-        * VERSION:          1.0                                           *
+        * VERSION:      2.1.1                                             *
         *                                                                 *
-        * AUTHOR:           Winona Salesky                                *
-        *                   wsalesky@gmail.com                            *
-        * MODIFIED BY:      mikeg@artefactual.com                         *
+        * AUTHOR:       Winona Salesky                                    *
+        *               wsalesky@gmail.com                                *
         *                                                                 *
-        * DATE:             2013-08-14                                    *
+        * MODIFIED BY:  mikeg@artefactual.com                             *
+        *               david@artefactual.com                             *
         *                                                                 *
-        * ABOUT:            This file has been created for use with       *
-        *                   EAD xml files exported from the               *
-        *                   ArchivesSpace web application.                *
+        * DATE:         2022-06-07                                        *
+        *                                                                 *
+        * ABOUT:        This file has been created for use with           *
+        *               EAD xml files exported from the                   *
+        *               ArchivesSpace web application.                    *
         *                                                                 *
         *******************************************************************
     -->
@@ -105,6 +107,7 @@
             <xsl:when test="$tag = 'chronlist'">Chronology list</xsl:when>
             <xsl:when test="$tag = 'accessrestrict'">Restrictions on access</xsl:when>
             <xsl:when test="$tag = 'userestrict'">Conditions governing use</xsl:when>
+            <xsl:when test="$tag = 'container'">Physical storage</xsl:when>
             <xsl:when test="$tag = 'controlaccess'">Access points</xsl:when>
             <xsl:when test="$tag = 'corpname'">Corporate name</xsl:when>
             <xsl:when test="$tag = 'creation'">Creation</xsl:when>
@@ -164,7 +167,6 @@
             <xsl:when test="$tag = 'phystech'">Physical condition</xsl:when>
             <xsl:when test="$tag = 'physdesc'">Physical description</xsl:when>
             <xsl:when test="$tag = 'physfacet'">Physical facet</xsl:when>
-            <xsl:when test="$tag = 'physloc'">Physical location</xsl:when>
             <xsl:when test="$tag = 'ptr'">Pointer</xsl:when>
             <xsl:when test="$tag = 'ptrgrp'">Pointer group</xsl:when>
             <xsl:when test="$tag = 'ptrloc'">Pointer location</xsl:when>
@@ -232,6 +234,56 @@
         </xsl:variable>
         <xsl:value-of select="concat($month,' ',substring($dateString,9,2),', ',substring($dateString,1,4))"/>
     </xsl:function>
+    <!-- Uppercase the first letter of a string-->
+    <xsl:function name="local:ucfirst">
+        <xsl:param name="string"/>
+        <xsl:value-of select="upper-case(substring($string,1,1))"/>
+        <xsl:value-of select="substring($string,2)"/>
+    </xsl:function>
+    <!-- Map @type value to a human-readable string -->
+    <xsl:function name="local:typeLabel">
+        <xsl:param name="node"/>
+        <xsl:choose>
+            <!-- Title (ead:unittitle) type labels-->
+            <xsl:when test="$node[@type='otherInfo']">Other title information</xsl:when>
+            <!-- Note (ead:note) type labels -->
+            <xsl:when test="$node[@type='sourcesDescription']">Sources</xsl:when>
+            <xsl:when test="$node[@type='generalNote']">General</xsl:when>
+            <xsl:otherwise><xsl:value-of select="$node[@type]"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+    <!-- Lookup ead:odd type labels (except RAD title notes) -->
+    <xsl:function name="local:oddLabel">
+        <xsl:param name="node"/>
+        <xsl:choose>
+            <xsl:when test="$node[@type='levelOfDetail']">Level of detail</xsl:when>
+            <xsl:when test="$node[@type='statusDescription']">Status description</xsl:when>
+            <xsl:when test="$node[@type='descriptionIdentifier']">Description identifier</xsl:when>
+            <xsl:when test="$node[@type='institutionIdentifier']">Institution identifier</xsl:when>
+            <xsl:when test="$node[@type='edition']">Edition</xsl:when>
+            <xsl:when test="$node[@type='physDesc']">Physical description</xsl:when>
+            <xsl:when test="$node[@type='conservation']">Conservation</xsl:when>
+            <xsl:when test="$node[@type='material']">Accompanying material</xsl:when>
+            <xsl:when test="$node[@type='alphanumericDesignation']">Alpha-numeric designations</xsl:when>
+            <xsl:when test="$node[@type='bibSeries']">Publisher's series</xsl:when>
+            <xsl:when test="$node[@type='rights']">Rights</xsl:when>
+            <xsl:when test="$node[@type='publicationStatus']">Publication status</xsl:when>
+        </xsl:choose>
+    </xsl:function>
+    <!-- RAD title note (ead:odd) type labels -->
+    <xsl:function name="local:titleNoteLabel">
+        <xsl:param name="node"/>
+        <xsl:choose>
+            <xsl:when test="$node[@type='titleVariation']">Variations in title</xsl:when>
+            <xsl:when test="$node[@type='titleAttributions']">Attributions and conjectures</xsl:when>
+            <xsl:when test="$node[@type='titleContinuation']">Continuation of title</xsl:when>
+            <xsl:when test="$node[@type='titleStatRep']">Statements of responsibility</xsl:when>
+            <xsl:when test="$node[@type='titleParallel']">Parallel titles and other title information</xsl:when>
+            <xsl:when test="$node[@type='titleSource']">Source of title proper</xsl:when>
+            <xsl:otherwise><xsl:value-of select="$node[@type]"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+
     <!--
         Prints out full language name from abbreviation.
         List based on the ISO 639-2b three-letter language codes (http://www.loc.gov/standards/iso639-2/php/code_list.php).

@@ -27,6 +27,15 @@ class QubitFindingAidGeneratorTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($resource2, $generator->getResource());
     }
 
+    public function testSetResourceRootException()
+    {
+        $resource = new QubitInformationObject();
+        $resource->id = 1;
+
+        $this->expectException(UnexpectedValueException::class);
+        $generator = new QubitFindingAidGenerator($resource);
+    }
+
     public function testSetResourceTypeError()
     {
         $generator = new QubitFindingAidGenerator(new QubitInformationObject());
@@ -52,6 +61,31 @@ class QubitFindingAidGeneratorTest extends \PHPUnit\Framework\TestCase
         );
 
         $this->assertSame($logger, $generator->getLogger());
+    }
+
+    public function testValidateSetting()
+    {
+        $generator = new QubitFindingAidGenerator(new QubitInformationObject());
+
+        $this->assertTrue(
+            $generator->validateSetting('val1', ['val1', 'val2'])
+        );
+    }
+
+    public function testValidateSettingUnexpectedValue()
+    {
+        $generator = new QubitFindingAidGenerator(new QubitInformationObject());
+        $this->expectException(UnexpectedValueException::class);
+
+        $generator->validateSetting('test', ['val1', 'val2']);
+    }
+
+    public function testSetAuthLevel()
+    {
+        $generator = new QubitFindingAidGenerator(new QubitInformationObject());
+        $generator->setAuthLevel('public');
+
+        $this->assertSame('public', $generator->getAuthLevel());
     }
 
     public function testSetAppRoot()
@@ -103,14 +137,6 @@ class QubitFindingAidGeneratorTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('full-details', $generator->getModel());
     }
 
-    public function testSetInvalidModel()
-    {
-        $generator = new QubitFindingAidGenerator(new QubitInformationObject());
-
-        $this->expectException(UnexpectedValueException::class);
-        $generator->setModel('foo');
-    }
-
     public function testGetXslFilePath()
     {
         $generator = new QubitFindingAidGenerator(new QubitInformationObject());
@@ -122,14 +148,36 @@ class QubitFindingAidGeneratorTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testGetCatalogPath()
+    {
+        $generator = new QubitFindingAidGenerator(new QubitInformationObject());
+        $generator->setAppRoot('/tmp');
+
+        $this->assertSame(
+            '/tmp/vendor/resolver.jar',
+            $generator->getResolverPath()
+        );
+    }
+
     public function testGetSaxonPath()
     {
         $generator = new QubitFindingAidGenerator(new QubitInformationObject());
         $generator->setAppRoot('/tmp');
 
         $this->assertSame(
-            '/tmp/'.QubitFindingAidGenerator::SAXON_PATH,
+            '/tmp/vendor/saxon-he-10.6.jar',
             $generator->getSaxonPath()
+        );
+    }
+
+    public function testGetResolverPath()
+    {
+        $generator = new QubitFindingAidGenerator(new QubitInformationObject());
+        $generator->setAppRoot('/tmp');
+
+        $this->assertSame(
+            '/tmp/data/xml/catalog.xml',
+            $generator->getCatalogPath()
         );
     }
 }

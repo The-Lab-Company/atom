@@ -30,6 +30,7 @@ class QubitCsvTransformFactory
     public $setupLogic;
     public $transformLogic;
     public $preserveOrder;
+    public $sortOrderCallback;
     public $levelsOfDescription;
     public $convertWindowsEncoding;
 
@@ -47,6 +48,7 @@ class QubitCsvTransformFactory
             'setupLogic',
             'transformLogic',
             'preserveOrder',
+            'sortOrderCallback',
             'levelsOfDescription',
             'convertWindowsEncoding',
         ];
@@ -67,10 +69,9 @@ class QubitCsvTransformFactory
         $tempCsvFile = sys_get_temp_dir().'/'.$this->machineName.'_stage1.csv';
 
         return new QubitCsvTransform([
-            'options' => $this->cliOptions,
-
             'status' => [
-                'cliOptions' => $this->cliOptions,
+                'finalOutputFile' => $this->cliOptions['output-file'],
+                'ignoreBadLod' => $this->cliOptions['ignore-bad-lod'],
                 'parentKeys' => [],
                 'ignoreRows' => $this->ignoreRows,
                 'ignoreRowCheckLogic' => $this->ignoreRowCheckLogic,
@@ -82,6 +83,7 @@ class QubitCsvTransformFactory
             ],
 
             'preserveOrder' => $this->preserveOrder,
+            'sortOrderCallback' => $this->sortOrderCallback,
             'levelsOfDescription' => $this->levelsOfDescription,
             'convertWindowsEncoding' => $this->convertWindowsEncoding,
 
@@ -119,8 +121,6 @@ class QubitCsvTransformFactory
                 }
 
                 $stage2 = new QubitCsvTransform([
-                    'skipOptionsAndEnvironmentCheck' => true,
-
                     'status' => [
                         'cliOptions' => $self->status['cliOptions'],
                         'finalOutputFile' => $self->status['finalOutputFile'],
@@ -135,6 +135,7 @@ class QubitCsvTransformFactory
                     ],
 
                     'preserveOrder' => $self->preserveOrder,
+                    'sortOrderCallback' => $self->sortOrderCallback,
                     'levelsOfDescription' => $self->levelsOfDescription,
                     'convertWindowsEncoding' => $self->convertWindowsEncoding,
 
@@ -174,16 +175,16 @@ class QubitCsvTransformFactory
                         if ($levelOfDescriptionAvailable) {
                             if (!empty($self->preserveOrder)) {
                                 $sortorder = $self->getStatus('rows');
+                            } elseif (!empty($self->sortOrderCallback) && is_callable($self->sortOrderCallback)) {
+                                $sortorder = call_user_func_array($self->sortOrderCallback, [$self]);
                             } else {
                                 $sortorder = $self->levelOfDescriptionToSortorder($self->columnValue('levelOfDescription'));
                             }
 
                             if (is_numeric($sortorder)) {
-                                //  print "Description sort order is ". $sortorder .".\n";
                                 $self->addRowToMySQL($sortorder);
                             } elseif (isset($self->status['ignoreBadLod']) && $self->status['ignoreBadLod']) {
                                 $sortorder = count($self->levelsOfDescription);
-                                //  print "Description sort order is ". $sortorder .".\n";
                                 $self->addRowToMySQL($sortorder);
                             } else {
                                 ++$self->status['badLevelOfDescription'];
@@ -195,11 +196,15 @@ class QubitCsvTransformFactory
                     },
 
                     'completeLogic' => function (&$self) {
-                        $self->writeMySQLRowsToCsvFilePath($self->status['finalOutputFile']);
+                        if (!empty($self->status['finalOutputFile'])) {
+                            $self->writeMySQLRowsToCsvFilePath($self->status['finalOutputFile']);
+                        }
 
                         echo "Step 2 complete.\n";
                         echo 'Bad parents found: '.$self->status['badParents'].".\n";
                         echo 'Bad level of description found: '.$self->status['badLevelOfDescription'].".\n";
+
+                        QubitCsvTransform::dropMySQLtemp();
                     },
                 ]);
 

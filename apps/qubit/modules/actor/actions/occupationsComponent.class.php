@@ -22,7 +22,7 @@ class ActorOccupationsComponent extends sfComponent
     public function execute($request)
     {
         // Create form. The note field has to be named content to allow translations
-        $this->form = new sfForm();
+        $this->form = new sfForm([], [], false);
         $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
         $this->form->setValidator('occupation', new sfValidatorString());
         $this->form->setValidator('content', new sfValidatorString());

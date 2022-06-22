@@ -62,7 +62,7 @@ abstract class exportBulkBaseTask extends sfBaseTask
         switch ($format) {
             case 'ead':
                 $eadLevels = ['class', 'collection', 'file', 'fonds', 'item', 'otherlevel', 'recordgrp', 'series', 'subfonds', 'subgrp', 'subseries'];
-                $ead = new sfEadPlugin($resource);
+                $ead = new sfEadPlugin($resource, $options);
 
                 break;
 
@@ -148,7 +148,7 @@ abstract class exportBulkBaseTask extends sfBaseTask
             } else {
                 // Fetch top-level descriptions if EAD (EAD data nests children) or if only exporting top-level
                 $whereClause = ('ead' == $options['format'] || $options['current-level-only'])
-                    ? 'parent_id = '
+                    ? 'i.parent_id = '
                     : 'i.id != ';
                 $whereClause .= QubitInformationObject::ROOT_ID;
             }

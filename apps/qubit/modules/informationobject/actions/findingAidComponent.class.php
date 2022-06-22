@@ -21,6 +21,12 @@ class InformationObjectFindingAidComponent extends sfComponent
 {
     public function execute($request)
     {
+        // If Finding Aids are explicitly disabled in QubitSettings, don't show
+        // this contenxt menu
+        if ('1' !== sfConfig::get('app_findingAidsEnabled', '1')) {
+            return sfView::NONE;
+        }
+
         $this->showDownload = false;
         $this->showStatus = false;
         $this->showUpload = false;
@@ -36,14 +42,14 @@ class InformationObjectFindingAidComponent extends sfComponent
 
         // Public users can only see the download link if the file exists
         if (!$this->getUser()->isAuthenticated()) {
-            if (!empty($findingAid->getPath())) {
-                $this->path = $findingAid->getPath();
-                $this->showDownload = true;
-
-                return;
+            if (empty($findingAid->getPath())) {
+                return sfView::NONE;
             }
 
-            return sfView::NONE;
+            $this->path = $findingAid->getPath();
+            $this->showDownload = true;
+
+            return;
         }
 
         $lastJobStatus = arFindingAidJob::getStatus($this->resource->id);
