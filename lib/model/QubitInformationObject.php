@@ -3261,4 +3261,31 @@ class QubitInformationObject extends BaseInformationObject
     $counterValue = $counter->getValue(array('sourceCulture' => true));
     return Qubit::generateIdentifierFromCounterAndMask($counterValue, sfConfig::get('app_identifier_mask', ''));
   }
+
+  /**
+   * Check if this informationObject is digitalized
+   * @param boolean $local_only If local_only = TRUE, checks only in Digitalized table, not in remote system
+   * @return TRUE / FALSE
+   */
+  public function digitalized($local_only = FALSE)
+  {
+    $criteria = new Criteria;
+    $criteria->add(QubitDigitalized::ID, $this->id);
+
+    if (NULL == QubitDigitalized::get($criteria)->current())
+    {
+        if ($local_only)
+        {
+            return FALSE;
+        }
+        else
+        {
+            return QubitDigitalized::checkRemoteDigitalized($this);
+        }
+    }
+    else
+    {
+        return TRUE;
+    }
+  }
 }

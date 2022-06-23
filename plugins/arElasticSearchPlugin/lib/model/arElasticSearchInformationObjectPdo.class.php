@@ -714,6 +714,20 @@ class arElasticSearchInformationObjectPdo
     return self::$statements['aips']->fetchAll(PDO::FETCH_OBJ);
   }
 
+  protected function checkDigitalized()
+  {
+    $sql = 'SELECT id FROM digitalized WHERE id = '.$this->id;
+
+    if (self::$conn->query($sql)->rowCount() == 0)
+    {
+      return false;
+    }
+    else
+    {
+      return true;
+    }
+  }
+
   protected function getPhysicalObjects()
   {
     $sql  = 'SELECT
@@ -863,6 +877,12 @@ class arElasticSearchInformationObjectPdo
     else
     {
       $serialized['hasDigitalObject'] = false;
+    }
+
+    // XeDam exclusive code for digitalized objects obtained from external server
+    if ($serialized['hasDigitalObject'] == false)
+    {
+      $serialized['hasDigitalObject'] = $this->checkDigitalized();
     }
 
     // Dates

@@ -93,6 +93,10 @@ class SettingsMenuComponent extends sfComponent
         'action' => 'privacyNotification'
       ),
       array(
+        'label' => $i18n->__('XeDAM'),
+        'action' => 'xeDam'
+      ),
+      array(
         'label' => $i18n->__('Clipboard'),
         'action' => 'clipboard'
       )

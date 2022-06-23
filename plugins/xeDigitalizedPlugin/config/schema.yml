@@ -1,0 +1,6 @@
+propel:
+  _attributes: { package: plugins.xeDigitalizedPlugin.lib.model }
+
+  digitalized:
+    id: {type: integer, required: true, primaryKey: true, foreignTable: information_object, foreignReference: id, onDelete: cascade, inheritanceKey: true }
+
