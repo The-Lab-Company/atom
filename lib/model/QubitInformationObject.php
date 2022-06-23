@@ -700,6 +700,17 @@ class QubitInformationObject extends BaseInformationObject
     }
   }
 
+  public function urlForEadThreetExport()
+  {
+    if (file_exists($this->pathToEadExport()))
+    # if ($this->getPublicationStatus()->statusId == QubitTerm::PUBLICATION_STATUS_PUBLISHED_ID && file_exists($this->pathToEadExport()))
+    {
+      return sfConfig::get('app_siteBaseUrl') . '/' . $this->pathToEadTestExport();
+    } else {
+      return sfContext::getInstance()->routing->generate(null, array($this, 'module' => 'xeEadPlugin', 'action', 'index', 'sf_format' => 'xml'));
+    }
+  }
+
   /**
    * Return file path to EAD XML, regardless of whether it's available.
    *

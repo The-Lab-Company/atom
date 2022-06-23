@@ -97,6 +97,15 @@
       </li>
     <?php endif; ?>
 
+    <?php if ($sf_context->getConfiguration()->isPluginEnabled('xeEadPlugin')): ?>
+      <li>
+        <a href="<?php echo $resource->urlForEadThreetExport() ?>">
+          <i class="fa fa-upload"></i>
+          <?php echo __('EAD 3 XML') ?>
+        </a>
+      </li>
+    <?php endif; ?>
+
     <?php if ('sfModsPlugin' == $sf_context->getModuleName() && $sf_context->getConfiguration()->isPluginEnabled('sfModsPlugin')): ?>
       <li>
         <a href="<?php echo url_for(array($resource, 'module' => 'sfModsPlugin', 'sf_format' => 'xml')) ?>">
