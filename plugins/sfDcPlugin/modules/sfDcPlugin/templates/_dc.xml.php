@@ -41,6 +41,10 @@
     <dc:format><?php echo esc_specialchars(strval($item)) ?></dc:format>
   <?php endforeach; ?>
 
+  <?php if ($digitalized) : ?>
+    <format>image/jpeg</format>
+  <?php endif; ?>
+
   <dc:identifier><?php echo esc_specialchars(sfConfig::get('app_siteBaseUrl') .'/'.$resource->slug) ?></dc:identifier>
 
   <?php if (!empty($resource->identifier)): ?>

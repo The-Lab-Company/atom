@@ -24,5 +24,7 @@ class sfDcPluginDcComponent extends sfComponent
     $this->iso639convertor = new fbISO639_Map;
 
     $this->dc = new sfDcPlugin($this->resource);
+
+    $this->digitalized = $this->resource->digitalized(TRUE);
   }
 }
