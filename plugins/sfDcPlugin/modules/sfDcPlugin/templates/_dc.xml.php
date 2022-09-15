@@ -30,7 +30,7 @@
   <?php endforeach; ?>
 
   <?php foreach ($dc->date as $item): ?>
-    <dc:date><?php echo esc_specialchars(strval($item)) ?></dc:date>
+    <dc:format><?php echo esc_specialchars(strval(str_replace("-","/",str_replace(" ", "", $item)))) ?></dc:format>
   <?php endforeach; ?>
 
   <?php foreach ($dc->type as $item): ?>
@@ -60,12 +60,12 @@
   <?php endif; ?>
 
   <?php foreach ($resource->language as $code): ?>
-    <dc:language xsi:type="dcterms:ISO639-3"><?php echo esc_specialchars(strval(strtolower($iso639convertor->getID3($code)))) ?></dc:language>
+    <dc:language><?php echo esc_specialchars(strval(strtolower($iso639convertor->getID3($code)))) ?></dc:language>
   <?php endforeach; ?>
 
   <?php if (isset($resource->repository)): ?>
     <dc:relation><?php echo esc_specialchars(sfConfig::get('app_siteBaseUrl').'/'.$resource->repository->slug) ?></dc:relation>
-    <dc:relation><?php echo esc_specialchars(strval($resource->repository->authorizedFormOfName)) ?></dc:relation>
+    <dc:relation><?php echo esc_specialchars($resource->repository) ?></dc:relation>
   <?php endif; ?>
 
   <?php foreach ($dc->coverage as $item): ?>
